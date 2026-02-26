@@ -3,6 +3,7 @@
     {
       "source": "/api/(.*)",
       "destination": "https://bug-tracker-wk65.onrender.com/api/$1"
-    }
+    },
+    { "source": "/(.*)", "destination": "/" }
   ]
 }

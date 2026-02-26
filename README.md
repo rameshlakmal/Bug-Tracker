@@ -119,6 +119,12 @@ Example Vercel proxy (create `vercel.json` in `client/`):
 
 This avoids SQLite persistence issues and is the most reliable "free" deployment.
 
+Prisma tip (recommended):
+
+- Use the Supabase pooler URL for `DATABASE_URL` in production.
+- Keep the Supabase direct URL in `DIRECT_URL` for migrations.
+- Locally, you can use the direct URL for both `DATABASE_URL` and `DIRECT_URL`.
+
 ## Troubleshooting
 
 - Prisma generate on Windows can fail with `EPERM: operation not permitted, rename ... query_engine-windows.dll.node`.
