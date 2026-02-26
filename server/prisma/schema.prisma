@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum MetricType {
+  PRIORITY
+  SEVERITY
+  STATUS
+  OTHER
+}
+
+model Project {
+  id        Int                 @id @default(autoincrement())
+  name      String              @unique
+  isActive  Boolean             @default(true)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  sprints   Sprint[]
+  members   ProjectDeveloper[]
+  entries   CountEntry[]
+}
+
+model Sprint {
+  id        Int       @id @default(autoincrement())
+  projectId Int
+  label     String
+  startDate DateTime?
+  endDate   DateTime?
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  entries   CountEntry[]
+
+  @@unique([projectId, label])
+  @@index([projectId])
+}
+
+model ProjectDeveloper {
+  projectId   Int
+  developerId Int
+  createdAt   DateTime @default(now())
+
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  developer Developer @relation(fields: [developerId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, developerId])
+  @@index([developerId])
+}
+
+model Developer {
+  id        Int         @id @default(autoincrement())
+  name      String      @unique
+  team      String?
+  isActive  Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  entries   CountEntry[]
+  projects  ProjectDeveloper[]
+}
+
+model CountEntry {
+  id         Int        @id @default(autoincrement())
+  projectId  Int
+  sprintId   Int
+  developerId Int
+  featureKey String     @default("")
+  metricType  MetricType
+  metricKey   String
+  count       Int        @default(0)
+  notes       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  project    Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sprint     Sprint      @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+  developer  Developer   @relation(fields: [developerId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, sprintId, featureKey])
+  @@index([developerId, sprintId, featureKey])
+  @@unique([projectId, sprintId, developerId, featureKey, metricType, metricKey])
+}
